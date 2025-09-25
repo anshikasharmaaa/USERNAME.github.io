@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Prof. [NAME] — IEI Election</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--accent:#0b5ed7;--muted:#666}
+  body{font-family:Montserrat,system-ui,-apple-system; margin:0; background:#f7f9fc; color:#111}
+  .wrap{max-width:980px;margin:18px auto;padding:18px}
+  .hero{display:flex;gap:24px;align-items:center;padding:24px;background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(12,24,40,0.06)}
+  .photo{width:140px;height:140px;border-radius:12px;overflow:hidden;flex-shrink:0}
+  .photo img{width:100%;height:100%;object-fit:cover}
+  h1{margin:0;font-size:22px}
+  p.lead{margin:6px 0 14px;color:var(--muted)}
+  .cta{display:inline-block;background:var(--accent);color:white;padding:10px 14px;border-radius:8px;text-decoration:none;font-weight:700;margin-right:8px}
+  .cta-alt{background:#198754}
+  .card{background:#fff;padding:18px;margin:18px 0;border-radius:10px;box-shadow:0 6px 18px rgba(12,24,40,0.04)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  footer{padding:18px;color:var(--muted);font-size:14px;text-align:center}
+  .reviews{max-height:260px;overflow:auto}
+  @media(max-width:640px){ .hero{flex-direction:column;align-items:flex-start} .photo{width:120px;height:120px} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <div class="photo"><img src="IMG_URL" alt="[NAME] photo"></div>
+      <div>
+        <h1>Prof. [NAME] — Candidate, IEI Chapter</h1>
+        <p class="lead">Student-first leadership • Events • Mentorship</p>
+        <div>
+          <a class="cta" href="#portfolio">View Portfolio</a>
+          <a class="cta cta-alt" href="#vote">Vote Info</a>
+          <a class="cta" href="RESUME_URL" target="_blank">Download Resume</a>
+        </div>
+        <div style="margin-top:12px;color:var(--muted)">Contact: +91-XXXXXXXXXX • Email: sir@example.com</div>
+      </div>
+    </section>
+
+    <main>
+      <section id="portfolio" class="card">
+        <h3>Portfolio & Achievements</h3>
+        <div class="grid">
+          <div><strong>Events Organized</strong><p class="muted">Tech workshops, campus drives, mentorship sessions.</p></div>
+          <div><strong>Publications</strong><p class="muted">2 research papers; 5 conference talks</p></div>
+          <div><strong>Student Support</strong><p class="muted">Internship placements, scholarship guidance</p></div>
+        </div>
+      </section>
+
+      <section id="vote" class="card">
+        <h3>Vote Info</h3>
+        <p><strong>Date:</strong> [Date here] • <strong>Time:</strong> [Time here]</p>
+        <p>Why vote? To get real events, mentorship, and transparency in chapter activities.</p>
+      </section>
+
+      <section class="card">
+        <h3>Student Feedback (Submit)</h3>
+        <!-- Paste your Google Form embed here -->
+        <iframe src="FORM_EMBED_URL" width="100%" height="520" style="border:0;border-radius:8px;"></iframe>
+      </section>
+
+      <section class="card">
+        <h3>Latest Reviews</h3>
+        <div class="reviews" id="reviewsArea">
+          <p>Loading reviews…</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>Made for IEI Election — contact: sir@example.com</footer>
+  </div>
+
+<script>
+/*
+  Auto-fetch latest reviews from published Google Sheet (gviz JSON).
+  Replace SHEET_ID below with your Google Sheet ID.
+  1) In Google Forms, click Responses → Open in Sheets.
+  2) In that Sheet: File → Publish to web → choose the sheet (or just make it viewable)
+  3) Replace SHEET_ID and optional 'sheet' param if needed.
+*/
+(function(){
+  const SHEET_ID = 'PUT_YOUR_SHEET_ID_HERE';
+  const sheetName = 'Form Responses 1'; // change if different
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}`;
+  const out = document.getElementById('reviewsArea');
+
+  fetch(url).then(r => r.text()).then(t => {
+    // parse wrapped JSON
+    const jsonText = t.substring(t.indexOf('(')+1, t.lastIndexOf(')'));
+    const data = JSON.parse(jsonText);
+    const rows = data.table.rows || [];
+    out.innerHTML = '';
+    if(!rows.length){ out.innerHTML = '<p>No reviews yet — be the first!</p>'; return; }
+    // show last 5
+    rows.slice(-5).reverse().forEach(r => {
+      // columns: timestamp (0), name (1), rating (2), comment (3) — adjust index if your form different
+      const name = (r.c[1] && r.c[1].v) ? r.c[1].v : 'Anonymous';
+      const comment = (r.c[3] && r.c[3].v) ? r.c[3].v : '';
+      const p = document.createElement('p');
+      p.innerHTML = `<strong>${escapeHtml(name)}</strong> — ${escapeHtml(comment)}`;
+      out.appendChild(p);
+    });
+  }).catch(e => {
+    out.innerHTML = '<p>Could not load reviews.</p>';
+    console.error(e);
+  });
+
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, (m)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+})();
+</script>
+</body>
+</html>
